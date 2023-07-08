@@ -5,9 +5,9 @@ from torchvision import transform
 import torch.nn.functional as F
 
 class ConvBlock(nn.Module):
-    def __init__(self, in_channels, out_channels): # in_channels: RGB의 경우 3, num_classes: 분류할 클래스 수(건물, 배경이므로 2)
+    def __init__(self, in_channels, out_channels):
         super(ConvBlock, self).__init__()
-        self.conv11 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1)
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1)
         self.bn1 = nn.BatchNorm2d(out_channels)
         self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1)
         self.bn2 = nn.BatchNorm2d(out_channels)
@@ -37,17 +37,20 @@ class ResUNet(nn.Module):
     def forward(self, x):
         conv1 = self.down1(x)
         x = F.max_pool2d(conv1, kernel_size=2, stride=2)
+
         conv2 = self.down2(x)
         x = F.max_pool2d(conv2, kernel_size=2, stride=2)
+
         conv3 = self.down3(x)
         x = F.max_pool2d(conv3, kernel_size=2, stride=2)
+
         conv4 = self.down4(x)
         x = F.max_pool2d(conv4, kernel_size=2, stride=2)
 
         x = self.center(x)
 
         x = F.interpolate(x, scale_factor=2, mode='bilinear', align_corners=False)
-        x = torch.cat([x, conv3], dim=1)
+        x = torch.cat([x, conv4], dim=1)
         x = self.up4(x)
 
         x = F.interpolate(x, scale_factor=2, mode='bilinear', align_corners=False)
