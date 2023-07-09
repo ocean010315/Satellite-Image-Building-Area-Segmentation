@@ -66,6 +66,6 @@ class ResUNet(nn.Module):
         x = self.up1(x)
 
         x = self.final_conv(x)
-        x = F.softmax(x, dim=1)
+        # x = F.softmax(x, dim=1)
 
         return x
